@@ -71,7 +71,7 @@
                     </div>
                     <div class="goal-item">
                         <h3>Algorithm Demonstration</h3>
-                        <p>Demonstrate the capabilities of reinforcement learning in autonomous vehicle navigation</p>
+                        <p>Demonstrate the capabilities of Multi-Agent Proximal Policy Optimization in autonomous vehicle navigation</p>
                     </div>
                     <div class="goal-item">
                         <h3>Research Foundation</h3>
@@ -119,10 +119,6 @@
                         <ul>
                             <li>Dynamic road networks with varying complexity</li>
                             <li>Realistic physics for vehicle dynamics</li>
-                            <li>Multiple vehicle types with different characteristics</li>
-                            <li>Environmental factors (weather, time of day)</li>
-                            <li>Traffic signal systems and road signs</li>
-                            <li>Obstacle generation and placement</li>
                         </ul>
                     </div>
                 </div>
@@ -133,10 +129,9 @@
                         <p>The reward function is carefully designed to encourage desired driving behaviors:</p>
                         <ul>
                             <li>Positive rewards for maintaining lane position and following traffic rules</li>
-                            <li>Negative rewards for collisions, off-road driving, and traffic violations</li>
+                            <li>Negative rewards for collisions and off-road driving</li>
                             <li>Reward shaping for smooth acceleration and braking</li>
                             <li>Distance-based rewards to encourage progress toward destinations</li>
-                            <li>Safety-based rewards for maintaining safe distances from other vehicles</li>
                         </ul>
                     </div>
                 </div>
@@ -163,22 +158,6 @@
                             <li>Centralized value function that considers the global state</li>
                             <li>Decentralized execution where agents act based on local observations</li>
                             <li>Parameter sharing between agents to reduce learning time</li>
-                            <li>Attention mechanisms to focus on relevant agent interactions</li>
-                            <li>Counterfactual reasoning to evaluate individual agent contributions</li>
-                        </ul>
-                    </div>
-                </div>
-                
-                <div class="implementation-content">
-                    <div class="implementation-text">
-                        <h3>Policy Networks</h3>
-                        <p>The policy networks are designed to handle complex driving scenarios:</p>
-                        <ul>
-                            <li>Convolutional layers for processing visual inputs from the environment</li>
-                            <li>Recurrent layers to maintain temporal awareness of driving history</li>
-                            <li>Attention mechanisms to focus on relevant environmental features</li>
-                            <li>Separate networks for high-level decision making and low-level control</li>
-                            <li>Hierarchical policy structure for complex multi-step tasks</li>
                         </ul>
                     </div>
                 </div>
@@ -190,9 +169,6 @@
                         <ul>
                             <li>Prioritized experience replay to focus on challenging scenarios</li>
                             <li>Curriculum learning starting with simple scenarios and gradually increasing complexity</li>
-                            <li>Multi-task learning to transfer knowledge between different driving tasks</li>
-                            <li>Self-supervised learning for representation learning from unlabeled data</li>
-                            <li>Continuous self-improvement through online learning</li>
                         </ul>
                     </div>
                 </div>
