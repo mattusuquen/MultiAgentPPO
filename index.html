@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autonomous Vehicle RL Project</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="nav-content">
+                <h1>Self-Driving Cars</h1>
+                <ul>
+                    <li><a href="#overview">Overview</a></li>
+                    <li><a href="#goals">Goals</a></li>
+                    <li><a href="#technical">Technical Details</a></li>
+                    <li><a href="#implementation">Implementation</a></li>
+                    <li><a href="#progress">Progress</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section id="hero">
+            <div class="hero-content">
+                <h1>Multi-Agent Reinforcement Learning for Self-Driving Cars</h1>
+                <p>A sophisticated simulation environment for testing and developing autonomous driving algorithms</p>
+            </div>
+        </section>
+
+        <section id="overview">
+            <div class="container">
+                <h2>Project Overview</h2>
+                <p>This project represents an advanced exploration into autonomous vehicle navigation using reinforcement learning techniques. Through a custom-built Unity Game Engine simulation environment, we're developing and testing sophisticated algorithms that enable autonomous vehicles to navigate complex road scenarios.</p>
+                
+                <div class="features">
+                    <div class="feature-card">
+                        <i class="fas fa-car"></i>
+                        <h3>Autonomous Navigation</h3>
+                        <p>Advanced algorithms for real-time decision making and control</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-brain"></i>
+                        <h3>Reinforcement Learning</h3>
+                        <p>State-of-the-art RL techniques for continuous control problems</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-code"></i>
+                        <h3>Simulation Environment</h3>
+                        <p>Flexible and modular Unity Game Engine-based testing environment</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="goals">
+            <div class="container">
+                <h2>Project Goals</h2>
+                <div class="goals-grid">
+                    <div class="goal-item">
+                        <h3>Technical Understanding</h3>
+                        <p>Develop comprehensive understanding of reinforcement learning techniques applied to continuous control problems</p>
+                    </div>
+                    <div class="goal-item">
+                        <h3>Simulation Development</h3>
+                        <p>Create a flexible and modular simulation environment using Unity Game Engine</p>
+                    </div>
+                    <div class="goal-item">
+                        <h3>Algorithm Demonstration</h3>
+                        <p>Demonstrate the capabilities of reinforcement learning in autonomous vehicle navigation</p>
+                    </div>
+                    <div class="goal-item">
+                        <h3>Research Foundation</h3>
+                        <p>Establish a foundation for further research and development in autonomous driving</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="technical">
+            <div class="container">
+                <h2>Technical Stack</h2>
+                <div class="tech-stack">
+                    <div class="tech-item">
+                        <i class="fab fa-python"></i>
+                        <h3>Python</h3>
+                        <p>Primary programming language</p>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fas fa-gamepad"></i>
+                        <h3>Unity Game Engine</h3>
+                        <p>Simulation environment development</p>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fas fa-network-wired"></i>
+                        <h3>PyTorch/TensorFlow</h3>
+                        <p>Reinforcement learning implementation</p>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fas fa-book"></i>
+                        <h3>Jupyter Notebook</h3>
+                        <p>Documentation and experimentation</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="implementation">
+            <div class="container">
+                <h2>Implementation Details</h2>
+                <div class="implementation-content">
+                    <div class="implementation-text">
+                        <h3>Environment Design</h3>
+                        <p>The simulation environment is built using Unity Game Engine, providing a realistic 3D representation of road scenarios. Key components include:</p>
+                        <ul>
+                            <li>Dynamic road networks with varying complexity</li>
+                            <li>Realistic physics for vehicle dynamics</li>
+                            <li>Multiple vehicle types with different characteristics</li>
+                            <li>Environmental factors (weather, time of day)</li>
+                            <li>Traffic signal systems and road signs</li>
+                            <li>Obstacle generation and placement</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="implementation-content">
+                    <div class="implementation-text">
+                        <h3>Reward Function Design</h3>
+                        <p>The reward function is carefully designed to encourage desired driving behaviors:</p>
+                        <ul>
+                            <li>Positive rewards for maintaining lane position and following traffic rules</li>
+                            <li>Negative rewards for collisions, off-road driving, and traffic violations</li>
+                            <li>Reward shaping for smooth acceleration and braking</li>
+                            <li>Distance-based rewards to encourage progress toward destinations</li>
+                            <li>Safety-based rewards for maintaining safe distances from other vehicles</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="implementation-content">
+                    <div class="implementation-text">
+                        <h3>PPO Algorithm Implementation</h3>
+                        <p>The project utilizes the Proximal Policy Optimization (PPO) algorithm, which offers stable training for continuous control tasks:</p>
+                        <ul>
+                            <li>Clipped objective function to prevent large policy updates</li>
+                            <li>Value function loss with entropy bonus for exploration</li>
+                            <li>Adaptive learning rate based on KL divergence</li>
+                            <li>Generalized Advantage Estimation (GAE) for better value estimation</li>
+                            <li>Parallel environment sampling for efficient data collection</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="implementation-content">
+                    <div class="implementation-text">
+                        <h3>Multi-Agent Shared Critic</h3>
+                        <p>A shared critic architecture enables efficient learning across multiple agents:</p>
+                        <ul>
+                            <li>Centralized value function that considers the global state</li>
+                            <li>Decentralized execution where agents act based on local observations</li>
+                            <li>Parameter sharing between agents to reduce learning time</li>
+                            <li>Attention mechanisms to focus on relevant agent interactions</li>
+                            <li>Counterfactual reasoning to evaluate individual agent contributions</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="implementation-content">
+                    <div class="implementation-text">
+                        <h3>Policy Networks</h3>
+                        <p>The policy networks are designed to handle complex driving scenarios:</p>
+                        <ul>
+                            <li>Convolutional layers for processing visual inputs from the environment</li>
+                            <li>Recurrent layers to maintain temporal awareness of driving history</li>
+                            <li>Attention mechanisms to focus on relevant environmental features</li>
+                            <li>Separate networks for high-level decision making and low-level control</li>
+                            <li>Hierarchical policy structure for complex multi-step tasks</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="implementation-content">
+                    <div class="implementation-text">
+                        <h3>Data Collection & Training</h3>
+                        <p>Efficient data collection and training strategies are employed:</p>
+                        <ul>
+                            <li>Prioritized experience replay to focus on challenging scenarios</li>
+                            <li>Curriculum learning starting with simple scenarios and gradually increasing complexity</li>
+                            <li>Multi-task learning to transfer knowledge between different driving tasks</li>
+                            <li>Self-supervised learning for representation learning from unlabeled data</li>
+                            <li>Continuous self-improvement through online learning</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="progress">
+            <div class="container">
+                <h2>Project Progress & Future Plans</h2>
+                <div class="progress-timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <h3>Current Progress</h3>
+                            <ul>
+                                <li>Basic simulation environment setup in Unity</li>
+                                <li>Initial implementation of PPO algorithm</li>
+                                <li>Development of reward function framework</li>
+                                <li>Basic multi-agent architecture design</li>
+                                <li>Preliminary testing with simple scenarios</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <h3>Short-term Goals</h3>
+                            <ul>
+                                <li>Refine the reward function based on initial testing</li>
+                                <li>Implement the shared critic architecture</li>
+                                <li>Develop more complex road scenarios</li>
+                                <li>Optimize the policy networks for better performance</li>
+                                <li>Implement data collection and storage pipeline</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <h3>Long-term Vision</h3>
+                            <ul>
+                                <li>Scale to handle multiple interacting vehicles</li>
+                                <li>Implement advanced traffic management systems</li>
+                                <li>Develop transfer learning capabilities for new scenarios</li>
+                                <li>Create a comprehensive evaluation framework</li>
+                                <li>Publish research findings and open-source components</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact">
+            <div class="container">
+                <h2>Get in Touch</h2>
+                <div class="contact-content">
+                    <p>Interested in learning more about this project or potential collaborations?</p>
+                    <div class="contact-info">
+                        <div class="contact-item">
+                            <i class="fas fa-envelope"></i>
+                            <p>Email</p>
+                        </div>
+                        <div class="contact-item">
+                            <i class="fab fa-github"></i>
+                            <p>GitHub</p>
+                        </div>
+                        <div class="contact-item">
+                            <i class="fab fa-linkedin"></i>
+                            <p>LinkedIn</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>Developed by Matthew Usuquen.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html> 
