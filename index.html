@@ -24,11 +24,9 @@
                             <li><a href="#implementation">Environment Design</a></li>
                             <li><a href="#implementation">Agent Design</a></li>
                             <li><a href="#implementation">Proximal Policy Optimization</a></li>
-                            <li><a href="#implementation">Reward Function</a></li>
-                            <li><a href="#implementation">Multi-Agent</a></li>
+                            <li><a href="#implementation">Reward Function Design</a></li>
+                            <li><a href="#implementation">Multi-Agent Learning</a></li>
                             <li><a href="#implementation">Data Collection</a></li>
-                            <li><a href="#results">Results</a></li>
-                            <li><a href="#future-work">Future Work</a></li>
                         </ul>
                     </li>
                     <li><a href="#contact">Contact</a></li>
@@ -242,112 +240,107 @@
                 
                 <div class="implementation-content">
                     <div class="implementation-text">
-                        <h3>Proximal Policy Optimization</h3>
-                        <p>Proximal Policy Optimization (PPO) is a state-of-the-art policy gradient method in reinforcement learning (RL), designed to improve the stability and reliability of training by restricting the size of policy updates. PPO is particularly favored for its simplicity and effectiveness.</p>
-
-                        <h4>RL Problem Setup</h3>
-                        <p>In RL, we train a <strong>policy</strong> \( \pi_\theta(a|s) \) (parameterized by \( \theta \)) to maximize the expected return:</p>
+                        <h3>Proximal Policy Optimization (PPO)</h3>
+                        <p>PPO is a popular algorithm in reinforcement learning. It helps train an agent (like a robot or game player) to make good decisions by improving its strategy little by little in a stable way. PPO works well because it keeps policy updates from being too big, which can otherwise break learning.</p>
+                
+                        <h4>What’s the Goal in Reinforcement Learning?</h4>
+                        <p>In RL, we want to find the best <strong>policy</strong>—a function that tells our agent what to do in each situation (state) to get the most reward over time.</p>
+                        <p>The expected reward is written like this:</p>
                         <p>
                             \[
                             J(\theta) = \mathbb{E}_{\pi_\theta} \left[ \sum_{t=0}^T \gamma^t r_t \right]
                             \]
                         </p>
-                        <p>Where:</p>
                         <ul>
-                            <li><strong>s</strong> = state</li>
-                            <li><strong>a</strong> = action</li>
-                            <li><strong>r_t</strong> = reward at time t</li>
-                            <li><strong>\(\gamma \in (0,1)\)</strong> = discount factor</li>
-                            <li><strong>\(\pi_\theta(a|s)\)</strong> = probability of taking action \(a\) given state \(s\)</li>
+                            <li><strong>s</strong>: current state</li>
+                            <li><strong>a</strong>: action taken</li>
+                            <li><strong>r_t</strong>: reward at time <em>t</em></li>
+                            <li><strong>\(\gamma\)</strong>: discount factor (makes future rewards worth slightly less)</li>
+                            <li><strong>\(\pi_\theta(a|s)\)</strong>: the policy’s probability of choosing action <em>a</em> in state <em>s</em></li>
                         </ul>
-
-                        <h4>Policy Gradient (Baseline)</h3>
-                        <p>The <strong>vanilla policy gradient</strong> approach estimates the gradient of the objective:</p>
+                
+                        <h4>Basic Policy Gradient Method</h4>
+                        <p>The basic way to improve the policy is called the <strong>policy gradient</strong>. It tries to push the policy in a direction that increases expected reward. The formula looks like this:</p>
                         <p>
                             \[
                             \nabla_\theta J(\theta) = \mathbb{E}_{\pi_\theta} \left[ \nabla_\theta \log \pi_\theta(a|s) \cdot A^{\pi}(s,a) \right]
                             \]
                         </p>
-                        <p>Where:</p>
-                        <ul>
-                            <li><strong>\(A^{\pi}(s,a)\)</strong> is the <em>advantage function</em>, estimating how good action \(a\) is compared to the average action at state \(s\).</li>
-                        </ul>
-                        <p>However, vanilla policy gradients can be <strong>unstable</strong> due to large updates in policy space.</p>
-
-                        <h4>PPO: Clipped Surrogate Objective</h3>
-
-                        <h5>Step 1: Compute Probability Ratio</h4>
-                        <p>The probability ratio is computed as:</p>
+                        <p>Here, \( A^{\pi}(s,a) \) is the <em>advantage</em>, which tells us how much better an action is than average at a given state.</p>
+                        <p>The problem is: basic policy gradients can make changes that are too big, which makes learning unstable.</p>
+                
+                        <h4>PPO: A Smarter Way to Update the Policy</h4>
+                
+                        <h5>Step 1: Compare New and Old Policy</h5>
+                        <p>PPO compares the new and old policy using this ratio:</p>
                         <p>
                             \[
                             r_t(\theta) = \frac{\pi_\theta(a_t|s_t)}{\pi_{\theta_{\text{old}}}(a_t|s_t)}
                             \]
                         </p>
-                        <p>This ratio compares how the new policy's probability differs from the old policy's.</p>
-
-                        <h5>Step 2: Define Clipped Objective</h4>
-                        <p>The clipped objective function is defined as:</p>
+                        <p>This tells us how much the new policy differs from the old one for the same action.</p>
+                
+                        <h5>Step 2: Clip the Objective</h5>
+                        <p>Instead of letting this ratio get too big or too small, we clip it. The goal is to avoid big, risky updates.</p>
                         <p>
                             \[
                             L^{CLIP}(\theta) = \mathbb{E}_t \left[ \min \left( r_t(\theta) \hat{A}_t, \text{clip}(r_t(\theta), 1 - \epsilon, 1 + \epsilon) \hat{A}_t \right) \right]
                             \]
                         </p>
-                        <p>Where:</p>
                         <ul>
-                            <li><strong>\(\hat{A}_t\)</strong> is the estimated advantage at timestep \(t\)</li>
-                            <li><strong>\(\epsilon\)</strong> is a small constant (e.g., 0.1 or 0.2)</li>
+                            <li>\(\hat{A}_t\): advantage at time <em>t</em></li>
+                            <li>\(\epsilon\): small constant (usually 0.1 or 0.2)</li>
                         </ul>
-                        <p>This clipping discourages \(r_t\) from moving too far from 1, thus preventing destructive updates.</p>
-
-                        <h5>Why It Works</h4>
-                        <p>If \(r_t\) tries to grow too much (say to 1.5 or 0.5), clipping flattens the objective to prevent further increase in reward — ensuring more <strong>conservative updates</strong>.</p>
-
-                        <h4>Advantage Estimation</h3>
-                        <p>Often, we use <strong>Generalized Advantage Estimation (GAE)</strong> to reduce variance:</p>
+                        <p>This keeps the update close to the old policy, which makes learning more stable.</p>
+                
+                        <h5>Why Clipping Helps</h5>
+                        <p>If the ratio becomes too large or too small (e.g., 1.5 or 0.5), clipping stops the algorithm from giving it too much weight. This keeps learning steps safe and consistent.</p>
+                
+                        <h4>How We Estimate Advantage (GAE)</h4>
+                        <p>PPO often uses a trick called <strong>Generalized Advantage Estimation</strong> to reduce noise in advantage values:</p>
                         <p>
                             \[
-                            \hat{A}_t = \delta_t + (\gamma \lambda) \delta_{t+1} + \cdots + (\gamma \lambda)^{T-t+1} \delta_{T-1}
+                            \hat{A}_t = \delta_t + (\gamma \lambda) \delta_{t+1} + \cdots
                             \]
                         </p>
-                        <p>Where the <em>temporal difference error</em> is:</p>
+                        <p>Where the <em>temporal difference error</em> \(\delta_t\) is:</p>
                         <p>
                             \[
                             \delta_t = r_t + \gamma V(s_{t+1}) - V(s_t)
                             \]
                         </p>
-                        <p>Here:</p>
                         <ul>
-                            <li><strong>V(s)</strong> = estimated value of state \(s\)</li>
-                            <li><strong>\(\lambda\)</strong> = GAE parameter (controls bias-variance tradeoff)</li>
+                            <li><strong>V(s)</strong>: estimated value of being in state <em>s</em></li>
+                            <li><strong>\(\lambda\)</strong>: parameter controlling bias vs. variance</li>
                         </ul>
-
-                        <h3>Training Procedure Summary</h3>
+                
+                        <h3>How PPO is Trained</h3>
                         <ul>
-                            <li>Collect rollouts (trajectories) with current policy</li>
+                            <li>Collect trajectories (sequences of state, action, reward)</li>
                             <li>Compute:
-                            <ul>
-                                <li>Returns \(R_t\)</li>
-                                <li>Value estimates \(V(s_t)\)</li>
-                                <li>Advantages \(\hat{A}_t\)</li>
-                            </ul>
+                                <ul>
+                                    <li>Total rewards (returns)</li>
+                                    <li>Estimated values \(V(s_t)\)</li>
+                                    <li>Advantages \(\hat{A}_t\)</li>
+                                </ul>
                             </li>
-                            <li>For several epochs:
-                            <ul>
-                                <li>Optimize \(L^{PPO}\) using mini-batches of rollout data</li>
-                            </ul>
+                            <li>Repeat for a few training rounds:
+                                <ul>
+                                    <li>Use mini-batches to optimize the PPO loss</li>
+                                </ul>
                             </li>
-                            <li>Repeat</li>
                         </ul>
-
-                        <h3>Why PPO Works Well</h3>
+                
+                        <h3>Why PPO is a Good Choice</h3>
                         <ul>
-                            <li><strong>Trust-region-like behavior:</strong> PPO restricts updates like TRPO but avoids its complex computation.</li>
-                            <li><strong>Sample efficiency:</strong> Reuses rollouts for multiple gradient steps.</li>
-                            <li><strong>Stability:</strong> Clipped objective prevents catastrophic updates.</li>
-                            <li><strong>Simplicity:</strong> Easy to implement with modern frameworks like PyTorch or TensorFlow.</li>
+                            <li><strong>Stable:</strong> Clipping prevents wild changes to the policy</li>
+                            <li><strong>Efficient:</strong> You can reuse the same data for multiple updates</li>
+                            <li><strong>Easy to implement:</strong> Works well with frameworks like PyTorch or TensorFlow</li>
+                            <li><strong>Reliable:</strong> PPO often works "out of the box" without complex tuning</li>
                         </ul>
                     </div>
                 </div>
+                
 
                 <div class="implementation-content">
                     <div class="implementation-text">
@@ -431,51 +424,66 @@
                 <div class="implementation-content">
                     <div class="implementation-text">
                         <h3>Multi-Agent Shared Critic</h3>
-                        <p>The multi-agent system employs a sophisticated shared critic architecture that enables efficient learning across multiple agents while maintaining decentralized execution. This approach combines the benefits of centralized training with decentralized execution, allowing agents to learn from each other's experiences while maintaining independent decision-making capabilities.</p>
-
                         <h4>Architecture Overview</h4>
-                        <ul>
-                            <li>
-                                <strong>Centralized Value Function:</strong>
-                                <ul>
-                                    <li>Global state representation incorporating information from all agents</li>
-                                    <li>Shared neural network for value estimation</li>
-                                    <li>Considers inter-agent relationships and environmental dynamics</li>
-                                </ul>
-                            </li>
-                            <li>
-                                <strong>Decentralized Execution:</strong>
-                                <ul>
-                                    <li>Each agent makes decisions based on local observations</li>
-                                    <li>Independent policy networks for individual agents</li>
-                                    <li>Real-time decision making without communication overhead</li>
-                                </ul>
-                            </li>
-                            <li>
-                                <strong>Parameter Sharing:</strong>
-                                <ul>
-                                    <li>Shared network weights across agents</li>
-                                    <li>Accelerated learning through experience transfer</li>
-                                    <li>Reduced memory footprint and training time</li>
-                                </ul>
-                            </li>
-                        </ul>
+
+                        <p>
+                        At the core of the shared critic architecture is a centralized value function that leverages a global state representation. Unlike traditional single-agent systems where the value function is solely based on local information, this centralized approach aggregates data from all agents, including their observations, actions, and relevant environmental signals. This global perspective enables the system to capture intricate inter-agent dependencies and emergent patterns that would otherwise be lost in decentralized learning.
+                        </p>
+
+                        <p>
+                        The centralized value function is implemented using a shared neural network trained to estimate the expected return of the entire system given the global state. This value estimate reflects not just the individual contributions of each agent, but also the collective dynamics that arise from their interactions. As a result, the critic network learns to assess the overall effectiveness of coordinated behavior, making it a powerful tool for guiding policy improvement.
+                        </p>
+
+                        <p>
+                        Despite the centralized nature of the training process, execution remains fully decentralized. Each agent operates based solely on its own local observations and internal policy, without needing access to the full global state or the actions of other agents at runtime. This separation ensures that agents can act independently in real-time, making the system suitable for deployment in bandwidth-constrained or communication-limited environments. To enable this, each agent is equipped with its own policy network that is trained to map its partial observations to actions. These policy networks are typically smaller and faster than the critic, optimized for real-time performance.
+                        </p>
+
+                        <p>
+                        A key innovation in this architecture is the use of parameter sharing. During training, the policy networks of different agents may share weights, either fully or partially, depending on the symmetry of their roles and tasks. This strategy significantly improves learning efficiency by enabling agents to transfer knowledge gained from their individual experiences to others. For instance, an agent that learns a successful maneuver in one context can contribute to the improvement of its peers in similar situations. Furthermore, parameter sharing reduces the overall memory and computational footprint, allowing more scalable training and simpler deployment.
+                        </p>
 
                         <h4>Training Process</h4>
-                        <ul>
-                            <li>Agents collect experiences simultaneously in the environment</li>
-                            <li>Shared critic evaluates the global state and provides value estimates</li>
-                            <li>Individual policies are updated using PPO with shared value estimates</li>
-                            <li>Parameter sharing enables knowledge transfer between agents</li>
-                        </ul>
+
+                        <p>
+                        The training process involves parallel experience collection from all agents interacting with a simulated or real-world environment. Each agent gathers sequences of states, actions, rewards, and next states based on its own local policy. These trajectories are then aggregated and used as input to the shared critic, which evaluates the global state and computes value estimates. These value signals serve as the baseline for computing advantages, which in turn guide policy updates.
+                        </p>
+
+                        <p>
+                        Policy updates are performed using Proximal Policy Optimization (PPO), a stable and efficient policy gradient method that ensures small, incremental updates to the policy parameters. The shared critic’s value estimates are used across all agents, enabling consistent and coordinated improvement even when the agents are learning independently. This shared learning signal encourages the emergence of synergistic behaviors that benefit the entire system, rather than optimizing each agent in isolation.
+                        </p>
+
+                        <p>
+                        Throughout training, parameter sharing further accelerates convergence. As agents update their shared networks, improvements discovered by one agent are immediately reflected across the others, reinforcing beneficial behaviors and reducing the need for redundant exploration. This synergy is especially valuable in complex environments where individual agents might not encounter all relevant scenarios on their own.
+                        </p>
 
                         <h4>Advantages</h4>
-                        <ul>
-                            <li>Improved sample efficiency through shared experience</li>
-                            <li>Better generalization across different driving scenarios</li>
-                            <li>Reduced training time compared to independent agent training</li>
-                            <li>Emergent cooperative behaviors through shared learning</li>
-                        </ul>
+
+                        <p>
+                        One of the most significant advantages of the shared critic architecture is its sample efficiency. By aggregating experiences from multiple agents and evaluating them using a single, comprehensive critic, the system can extract more meaningful learning signals from each episode. This is particularly beneficial in sparse or delayed reward settings, where individual trajectories might offer limited feedback.
+                        </p>
+
+                        <p>
+                        Another key benefit is improved generalization. Because the critic learns from a diverse range of joint states and agent configurations, it develops a more robust understanding of the environment. This enables the learned policies to generalize better to new scenarios, such as novel agent placements or unforeseen environmental conditions.
+                        </p>
+
+                        <p>
+                        Training time is also significantly reduced compared to independent learning approaches. Without a shared critic, each agent must learn its own value function, leading to duplicated effort and slower convergence. By centralizing this component, the system streamlines the learning process and makes better use of computational resources.
+                        </p>
+
+                        <p>
+                        Perhaps most intriguingly, the shared critic framework fosters emergent cooperative behaviors. Even without explicit coordination mechanisms, agents learn to act in ways that benefit the group as a whole because their policies are updated based on shared evaluations of joint outcomes. This implicit cooperation is a natural result of optimizing policies using a collective value signal, and it can lead to sophisticated team dynamics without the need for hand-crafted communication protocols.
+                        </p>
+
+                        <h4>Use Cases and Applicability</h4>
+
+                        <p>
+                        The shared critic architecture is particularly well-suited for domains that require both high coordination and decentralized execution. These include autonomous vehicle fleets, multi-drone navigation, robotic warehouse management, and distributed sensor systems. In these contexts, agents often operate under local constraints while contributing to a broader collective objective. The architecture’s ability to capture and exploit inter-agent synergies during training while supporting efficient individual decision-making during deployment makes it an ideal solution for such challenges.
+                        </p>
+
+                        <p>
+                        Furthermore, the model’s scalability, training efficiency, and support for emergent cooperation make it a promising foundation for future developments in multi-agent reinforcement learning and collaborative AI systems.
+                        </p>
+
                     </div>
                 </div>
                 
@@ -485,44 +493,32 @@
                         <p>The training process employs sophisticated data collection and learning strategies to ensure efficient and effective learning:</p>
                         
                         <h4>Experience Collection</h4>
-                        <ul>
-                            <li>
-                                <strong>Parallel Environment Execution:</strong>
-                                <ul>
-                                    <li>Multiple environments run simultaneously</li>
-                                    <li>Increased data collection throughput</li>
-                                    <li>Diverse experience sampling</li>
-                                </ul>
-                            </li>
-                            <li>
-                                <strong>Prioritized Experience Replay:</strong>
-                                <ul>
-                                    <li>Focus on challenging scenarios and rare events</li>
-                                    <li>Dynamic priority adjustment based on TD-error</li>
-                                    <li>Balanced sampling of experiences</li>
-                                </ul>
-                            </li>
-                        </ul>
+
+                        <p>
+                        A critical aspect of successful multi-agent reinforcement learning is the quality and diversity of experience collected during training. To this end, the system employs parallel environment execution, where multiple instances of the simulation environment are run concurrently. This dramatically increases the rate at which agents can collect trajectories, enabling rapid accumulation of a diverse and representative dataset. Each environment may differ slightly in its initial conditions, configurations, or stochastic elements, promoting exploration across a wider space of possible states and transitions. This parallelism not only boosts data throughput but also improves the statistical richness of the collected experience, which is essential for training generalizable policies.
+                        </p>
+
+                        <p>
+                        In addition to raw throughput, the system incorporates a prioritized experience replay mechanism to focus learning on high-value experiences. Rather than treating all collected samples equally, the replay buffer assigns priority scores to each transition, typically based on the temporal-difference (TD) error observed during training. Samples with higher TD errors—often corresponding to rare events, edge cases, or difficult decision points—are more likely to be revisited during policy updates. This ensures that the learning algorithm pays special attention to scenarios where the current policy performs poorly or is uncertain, accelerating improvement in the most challenging parts of the environment. At the same time, the buffer maintains a degree of stochastic sampling to preserve coverage across the entire experience distribution and prevent overfitting to outliers.
+                        </p>
 
                         <h4>Training Strategies</h4>
-                        <ul>
-                            <li>
-                                <strong>Curriculum Learning:</strong>
-                                <ul>
-                                    <li>Start with simple scenarios (straight roads)</li>
-                                    <li>Gradually introduce complexity (turns, intersections)</li>
-                                    <li>Progressive difficulty scaling</li>
-                                </ul>
-                            </li>
-                            <li>
-                                <strong>Hyperparameter Optimization:</strong>
-                                <ul>
-                                    <li>Learning rate scheduling</li>
-                                    <li>Batch size optimization</li>
-                                    <li>Network architecture tuning</li>
-                                </ul>
-                            </li>
-                        </ul>
+
+                        <p>
+                        The training process is structured using curriculum learning, a technique inspired by human education systems. Rather than exposing agents to the full complexity of the environment from the outset, training begins with simple, controlled scenarios—such as navigating straight roads with minimal obstacles. These foundational tasks help agents establish basic competencies in perception, action selection, and movement coordination without being overwhelmed by noise or ambiguity.
+                        </p>
+
+                        <p>
+                        As agents demonstrate proficiency in simpler tasks, the curriculum gradually increases in complexity. New challenges, such as curved roads, dynamic obstacles, intersections, or multi-agent interactions, are introduced incrementally. This progressive scaling helps agents adapt and extend their learned policies in a structured manner, reducing the risk of catastrophic forgetting and improving transfer to unseen scenarios. The curriculum can be manually defined or automatically adjusted based on performance metrics, ensuring that agents are consistently training at the edge of their competence.
+                        </p>
+
+                        <p>
+                        To support effective learning throughout this staged progression, the system applies rigorous hyperparameter optimization. Key parameters such as the learning rate, batch size, and network architecture are systematically tuned to match the demands of the current learning phase. Learning rate scheduling techniques, such as cosine annealing or step decay, are used to adapt the pace of learning as agents move from exploration-heavy early stages to fine-tuning in later stages. Batch size is adjusted to balance stability and computational efficiency, while the structure of neural networks—such as the number of layers, hidden units, and activation functions—is refined to ensure sufficient model capacity without overfitting.
+                        </p>
+
+                        <p>
+                        Together, these training strategies form a cohesive framework that guides agents from novice behavior to expert performance. By balancing exploration with exploitation, structuring task complexity over time, and continuously refining the learning process, the system enables the emergence of sophisticated behaviors across a wide range of operational scenarios.
+                        </p>
                     </div>
                 </div>
             </div>
