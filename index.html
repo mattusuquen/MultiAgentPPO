@@ -6,6 +6,8 @@
     <title>Autonomous Vehicle RL Project</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
 </head>
 <body>
     <header>
@@ -16,8 +18,19 @@
                     <li><a href="#overview">Overview</a></li>
                     <li><a href="#goals">Goals</a></li>
                     <li><a href="#technical">Technical Details</a></li>
-                    <li><a href="#implementation">Implementation</a></li>
-                    <li><a href="#progress">Progress</a></li>
+                    <li class="dropdown">
+                        <a href="#implementation">Implementation</a>
+                        <ul class="dropdown-content">
+                            <li><a href="#implementation">Environment Design</a></li>
+                            <li><a href="#implementation">Agent Design</a></li>
+                            <li><a href="#implementation">Proximal Policy Optimization</a></li>
+                            <li><a href="#implementation">Reward Function</a></li>
+                            <li><a href="#implementation">Multi-Agent</a></li>
+                            <li><a href="#implementation">Data Collection</a></li>
+                            <li><a href="#results">Results</a></li>
+                            <li><a href="#future-work">Future Work</a></li>
+                        </ul>
+                    </li>
                     <li><a href="#contact">Contact</a></li>
                 </ul>
             </div>
@@ -29,13 +42,14 @@
             <div class="hero-content">
                 <h1>Multi-Agent Reinforcement Learning for Self-Driving Cars</h1>
                 <p>A sophisticated simulation environment for testing and developing autonomous driving algorithms</p>
+                <a href="#overview" class="explore-button">Learn More</a>
             </div>
         </section>
 
         <section id="overview">
             <div class="container">
                 <h2>Project Overview</h2>
-                <p>This project represents an advanced exploration into autonomous vehicle navigation using reinforcement learning techniques. Through a custom-built Unity Game Engine simulation environment, we're developing and testing sophisticated algorithms that enable autonomous vehicles to navigate complex road scenarios.</p>
+                <p>This project represents an advanced exploration into autonomous vehicle navigation using reinforcement learning techniques. Through a custom-built Unity Game Engine simulation environment, I'm developing and testing sophisticated algorithms that enable autonomous vehicles to navigate complex road scenarios.</p>
                 
                 <div class="features">
                     <div class="feature-card">
@@ -51,7 +65,7 @@
                     <div class="feature-card">
                         <i class="fas fa-code"></i>
                         <h3>Simulation Environment</h3>
-                        <p>Flexible and modular Unity Game Engine-based testing environment</p>
+                        <p>Modular Unity Game Engine-based testing environment</p>
                     </div>
                 </div>
             </div>
@@ -115,37 +129,301 @@
                 <div class="implementation-content">
                     <div class="implementation-text">
                         <h3>Environment Design</h3>
-                        <p>The simulation environment is built using Unity Game Engine, providing a realistic 3D representation of road scenarios. Key components include:</p>
+                        <p>
+                            The autonomous driving simulation was built using Unity's ML-Agents toolkit to provide a controlled and flexible environment for reinforcement learning experiments. The virtual driving environment was carefully designed to balance realism with training efficiency, ensuring that the agent could learn effectively while avoiding unnecessary computational overhead.
+                          </p>
+                        
+                          <h4 style="margin-top: 1.5rem;">Key Features:</h4>
+                          <ul style="line-height: 1.6;">
+                            <li>
+                              <strong>Track Layouts:</strong> The environment includes multiple road configurations such as straight segments, sharp turns, intersections, and continuous loops. These variations challenge the agent's ability to generalize its learned policies across different driving conditions. In order to ensure smooth training, the agent is initially trained on the race track on the left to learn the basic behaviors required to drive. Then the pretrained agent is transfered to the urban environment featured on the left to learn how to interact with sharper turns and intersections.
+                              <ul>
+                                <li><img src="images/env-1.png"></li>
+                                <li><img src="images/env-2.png"></li>
+                              </ul>
+                            </li>
+                            <li>
+                              <strong>Road Markings & Boundaries:</strong> Lanes are marked with distinct colors and borders to simulate real-world road constraints. Going off-road or crossing into restricted areas results in negative rewards, guiding the agent to stay within safe driving zones. When the agent enters the red areas, the agent is penalized. The green represents the checkpoints to guide the direction of the agent. The agent is awarded when reaching the correct checkpoint.
+                              <ul>
+                                <li><img src="images/boundaries.png"></li>
+                              </ul>
+                            </li>
+                            <li>
+                              <strong>Sensor System:</strong> The agent is equipped with a front-facing raycast sensor array that simulates lidar-like perception. These rays detect distances to walls and obstacles, feeding spatial data into the neural network to inform decision-making. Note that the checkpoints are not detected by the sensors.
+                              <ul>
+                                <li><img src="images/sensor.gif"></li>
+                              </ul>
+                            </li>
+                            <li>
+                              <strong>Action Space:</strong> The agent outputs continuous values for steering and throttle, mimicking real vehicle controls. This enables smoother and more realistic driving behavior compared to discrete action spaces because it can make small fluid adjustments instead of being limited to a set of actions. In a complex driving environment, having a continous action space allows the agent to make detailed adjustments when dealing with avoiding aobstacles. However, this comes with the drawback of a longer training time because of the infinite number of possible actions that the agent needs to explore and learn causing noisier updates and slower convergance.
+                            </li>
+                            <li>
+                              <strong>Reward System:</strong> Rewards are structured to incentivize forward motion, staying in lane, and avoiding collisions. A small penalty is given for idling or veering off track, helping to shape desirable driving behaviors over time.
+                            </li>
+                            <li>
+                              <strong>Reset Conditions:</strong> Episodes reset automatically upon collision. Episodes also reset when passing the wrong checkpoint to prevent agents from moving in the wrong direction.
+                            </li>
+                          </ul>
+                    </div>
+                </div>
+
+                <div class="implementation-content">
+                    <div class="implementation-text">
+                        <h3>Agent Design</h3>
+                        <p>The agent's design is crucial for effective learning and decision-making in the autonomous driving environment. The agent's architecture and components are carefully designed to process environmental information and make appropriate driving decisions.</p>
+                        <h4>Key Components:</h4>
                         <ul>
-                            <li>Dynamic road networks with varying complexity</li>
-                            <li>Realistic physics for vehicle dynamics</li>
+                            <li>
+                                <strong>Controller & Physics System:</strong> The agent uses Unity's physics engine to create a Rigidbody to simulate realistic movement, acceleration, braking, and steering:
+                                <ul>
+                                    <li>Motor torque is applied to the rear wheels based on gas input and engine power</li>
+                                    <li>Torque is calculated from the engine RPM and power curve</li>
+                                    <li>Gear shifting: upshift when RPM exceeds a threshold and downshift when RPM drops below a threshold</li>
+                                    <li>Brake torque is applied to all wheels</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Observation Space:</strong> The agent receives a comprehensive set of observations including:
+                                <ul>
+                                    <li>Raycast sensor data for obstacle detection</li>
+                                    <li>Global position</li>
+                                    <li>Normalized rotational vector</li>
+                                    <li>Velocity vector and magnitude</li>
+                                    <li>Angular vector and magnitude</li>
+                                    <li>Relative position to road boundaries</li>
+                                    <li>Checkpoint proximity information</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>State Stacking & State Prediction:</strong>
+                                <p>The agent's decision-making process is enhanced through a sophisticated state stacking and prediction mechanism. This approach allows the agent to maintain temporal awareness and make more informed decisions by considering both historical and predicted future states.</p>
+
+                                <h4>State Stacking</h4>
+                                <p>The state stacking mechanism concatenates the current state with the previous two states to create a temporal context for decision-making. This approach is crucial for several reasons:</p>
+                                <ul>
+                                    <li>The current state provides immediate information about the agent's position, velocity, and surrounding environment.</li>
+                                    <li>The previous two states help the agent understand its motion dynamics, including acceleration patterns and trajectory trends.</li>
+                                    <li>This temporal context enables the agent to make smoother decisions by considering how its state has evolved over time.</li>
+                                </ul>
+                                <p>For example, when approaching a turn, the stacked states help the agent understand its current speed, how it has been accelerating or decelerating, and what adjustments might be needed to navigate the turn smoothly.</p>
+
+                                <h4>State Prediction</h4>
+                                <p>The state prediction system uses a pretrained neural network to forecast the next two states based on the current and stacked historical states. This prediction mechanism serves several important purposes:</p>
+                                <ul>
+                                    <li>The pretrained network has learned the dynamics of the environment and can accurately predict how the agent's state will evolve.</li>
+                                    <li>By predicting future states, the agent can anticipate potential issues before they occur, such as upcoming obstacles or the need to adjust speed for a turn.</li>
+                                    <li>The predictions help the agent make more proactive decisions rather than purely reactive ones.</li>
+                                </ul>
+                                <p>The prediction network takes as input the current state and the stacked historical states, and outputs predictions for the next two timesteps. These predictions include expected positions, velocities, and other relevant state variables. This forward-looking capability is particularly valuable in dynamic environments where immediate reactions might be too late to avoid problems.</p>
+
+                                <h4>Integration and Benefits</h4>
+                                <p>The combination of state stacking and prediction creates a powerful decision-making framework:</p>
+                                <ul>
+                                    <li><strong>Enhanced Temporal Awareness:</strong> The agent maintains a clear understanding of both its past trajectory and likely future states, enabling more informed decision-making.</li>
+                                    <li><strong>Proactive Planning:</strong> By predicting future states, the agent can plan its actions in advance rather than simply reacting to immediate circumstances.</li>
+                                    <li><strong>Improved Stability:</strong> The temporal context helps prevent erratic behavior by considering the agent's motion history when making decisions.</li>
+                                    <li><strong>Better Performance:</strong> This approach leads to smoother trajectories, more efficient navigation, and better handling of complex scenarios.</li>
+                                </ul>
+                                <p>For instance, when navigating through a series of turns, the agent can use its stacked states to understand its current trajectory and use the predicted states to plan the necessary adjustments for upcoming turns. This results in smoother, more efficient navigation compared to making decisions based solely on the current state.</p>
+                            </li>
+                            <li>
+                                <strong>Neural Network Architecture:</strong>
+                                <ul>
+                                    <li>Input layer processes sensor and state data</li>
+                                    <li>Multiple hidden layers with ReLU activation</li>
+                                    <li>Output layer for continuous action values for gas, brake, and steering angle</li>
+                                    <li>Dropout layers and normalization used to prevent overfitting</li>
+                                    <li>Independent shared value network for advantage estimation</li>
+                                </ul>
+                            </li>
                         </ul>
                     </div>
                 </div>
                 
+                <div class="implementation-content">
+                    <div class="implementation-text">
+                        <h3>Proximal Policy Optimization</h3>
+                        <p>Proximal Policy Optimization (PPO) is a state-of-the-art policy gradient method in reinforcement learning (RL), designed to improve the stability and reliability of training by restricting the size of policy updates. PPO is particularly favored for its simplicity and effectiveness.</p>
+
+                        <h4>RL Problem Setup</h3>
+                        <p>In RL, we train a <strong>policy</strong> \( \pi_\theta(a|s) \) (parameterized by \( \theta \)) to maximize the expected return:</p>
+                        <p>
+                            \[
+                            J(\theta) = \mathbb{E}_{\pi_\theta} \left[ \sum_{t=0}^T \gamma^t r_t \right]
+                            \]
+                        </p>
+                        <p>Where:</p>
+                        <ul>
+                            <li><strong>s</strong> = state</li>
+                            <li><strong>a</strong> = action</li>
+                            <li><strong>r_t</strong> = reward at time t</li>
+                            <li><strong>\(\gamma \in (0,1)\)</strong> = discount factor</li>
+                            <li><strong>\(\pi_\theta(a|s)\)</strong> = probability of taking action \(a\) given state \(s\)</li>
+                        </ul>
+
+                        <h4>Policy Gradient (Baseline)</h3>
+                        <p>The <strong>vanilla policy gradient</strong> approach estimates the gradient of the objective:</p>
+                        <p>
+                            \[
+                            \nabla_\theta J(\theta) = \mathbb{E}_{\pi_\theta} \left[ \nabla_\theta \log \pi_\theta(a|s) \cdot A^{\pi}(s,a) \right]
+                            \]
+                        </p>
+                        <p>Where:</p>
+                        <ul>
+                            <li><strong>\(A^{\pi}(s,a)\)</strong> is the <em>advantage function</em>, estimating how good action \(a\) is compared to the average action at state \(s\).</li>
+                        </ul>
+                        <p>However, vanilla policy gradients can be <strong>unstable</strong> due to large updates in policy space.</p>
+
+                        <h4>PPO: Clipped Surrogate Objective</h3>
+
+                        <h5>Step 1: Compute Probability Ratio</h4>
+                        <p>The probability ratio is computed as:</p>
+                        <p>
+                            \[
+                            r_t(\theta) = \frac{\pi_\theta(a_t|s_t)}{\pi_{\theta_{\text{old}}}(a_t|s_t)}
+                            \]
+                        </p>
+                        <p>This ratio compares how the new policy's probability differs from the old policy's.</p>
+
+                        <h5>Step 2: Define Clipped Objective</h4>
+                        <p>The clipped objective function is defined as:</p>
+                        <p>
+                            \[
+                            L^{CLIP}(\theta) = \mathbb{E}_t \left[ \min \left( r_t(\theta) \hat{A}_t, \text{clip}(r_t(\theta), 1 - \epsilon, 1 + \epsilon) \hat{A}_t \right) \right]
+                            \]
+                        </p>
+                        <p>Where:</p>
+                        <ul>
+                            <li><strong>\(\hat{A}_t\)</strong> is the estimated advantage at timestep \(t\)</li>
+                            <li><strong>\(\epsilon\)</strong> is a small constant (e.g., 0.1 or 0.2)</li>
+                        </ul>
+                        <p>This clipping discourages \(r_t\) from moving too far from 1, thus preventing destructive updates.</p>
+
+                        <h5>Why It Works</h4>
+                        <p>If \(r_t\) tries to grow too much (say to 1.5 or 0.5), clipping flattens the objective to prevent further increase in reward — ensuring more <strong>conservative updates</strong>.</p>
+
+                        <h4>Advantage Estimation</h3>
+                        <p>Often, we use <strong>Generalized Advantage Estimation (GAE)</strong> to reduce variance:</p>
+                        <p>
+                            \[
+                            \hat{A}_t = \delta_t + (\gamma \lambda) \delta_{t+1} + \cdots + (\gamma \lambda)^{T-t+1} \delta_{T-1}
+                            \]
+                        </p>
+                        <p>Where the <em>temporal difference error</em> is:</p>
+                        <p>
+                            \[
+                            \delta_t = r_t + \gamma V(s_{t+1}) - V(s_t)
+                            \]
+                        </p>
+                        <p>Here:</p>
+                        <ul>
+                            <li><strong>V(s)</strong> = estimated value of state \(s\)</li>
+                            <li><strong>\(\lambda\)</strong> = GAE parameter (controls bias-variance tradeoff)</li>
+                        </ul>
+
+                        <h3>Training Procedure Summary</h3>
+                        <ul>
+                            <li>Collect rollouts (trajectories) with current policy</li>
+                            <li>Compute:
+                            <ul>
+                                <li>Returns \(R_t\)</li>
+                                <li>Value estimates \(V(s_t)\)</li>
+                                <li>Advantages \(\hat{A}_t\)</li>
+                            </ul>
+                            </li>
+                            <li>For several epochs:
+                            <ul>
+                                <li>Optimize \(L^{PPO}\) using mini-batches of rollout data</li>
+                            </ul>
+                            </li>
+                            <li>Repeat</li>
+                        </ul>
+
+                        <h3>Why PPO Works Well</h3>
+                        <ul>
+                            <li><strong>Trust-region-like behavior:</strong> PPO restricts updates like TRPO but avoids its complex computation.</li>
+                            <li><strong>Sample efficiency:</strong> Reuses rollouts for multiple gradient steps.</li>
+                            <li><strong>Stability:</strong> Clipped objective prevents catastrophic updates.</li>
+                            <li><strong>Simplicity:</strong> Easy to implement with modern frameworks like PyTorch or TensorFlow.</li>
+                        </ul>
+                    </div>
+                </div>
+
                 <div class="implementation-content">
                     <div class="implementation-text">
                         <h3>Reward Function Design</h3>
+                        <p>The reward function is a critical component in defining the agent's performance. By quantifying the current state of the agent, the reward function guides the learning process and shapes the agent's behavior. The design of the reward function is crucial for effective training and achieving desired driving behaviors.</p>
+                        <p>The reward function is designed to provide feedback based on the agent's actions and the environment's state. It assigns rewards and penalties based on the agent's performance, encouraging it to learn optimal driving strategies.</p>
                         <p>The reward function is carefully designed to encourage desired driving behaviors:</p>
+                        <h4>✅ Rewards</h2>
+                        <table class="reward-table">
+                            <thead>
+                            <tr>
+                                <th>Scenario</th>
+                                <th>Reward Value</th>
+                                <th>Purpose</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td><strong>Forward Motion</strong></td>
+                                <td><code>+0.05 × forward velocity</code></td>
+                                <td>Encourages continuous forward motion</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Optimal Speed</strong><br><span class="subtext">(10–20 m/s)</span></td>
+                                <td><code>+0.02</code></td>
+                                <td>Incentivizes maintaining optimal speed</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Checkpoint Reached</strong></td>
+                                <td><code>+2.5 + scaled bonus</code><br><span class="subtext">(based on timer ratio)</span></td>
+                                <td>Strong reward with time-awareness; promotes efficiency</td>
+                            </tr>
+                            </tbody>
+                        </table>
+
+                        <h4>❌ Penalties</h3>
+                        <table class="penalty-table">
+                            <thead>
+                            <tr>
+                                <th>Scenario</th>
+                                <th>Penalty Value</th>
+                                <th>Purpose</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td><strong>Excessive Speed</strong><br><span class="subtext">(> 20 m/s)</span></td>
+                                <td><code>-0.02 × (velocity - 20)</code></td>
+                                <td>Penalizes excessive speeding for each m/s over 20 m/s</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Checkpoint Timeout</strong></td>
+                                <td><code>-2.0 - distance penalty</code></td>
+                                <td>Encourages urgency + adds positional feedback</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Vehicle Collision</strong></td>
+                                <td><code>-0.5 × cumulative reward</code></td>
+                                <td>Large penalty proportional to performance; promotes cautious driving</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Wall Collision</strong></td>
+                                <td><code>-0.1 × cumulative reward</code></td>
+                                <td>Softens penalty if progress was made</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Wrong Checkpoint</strong></td>
+                                <td><code>-1.0 - distance penalty</code></td>
+                                <td>Prevents agents from driving the wrong way</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <h4>Key notes:</h4>
                         <ul>
-                            <li>Positive rewards for maintaining lane position and following traffic rules</li>
-                            <li>Negative rewards for collisions and off-road driving</li>
-                            <li>Reward shaping for smooth acceleration and braking</li>
-                            <li>Distance-based rewards to encourage progress toward destinations</li>
-                        </ul>
-                    </div>
-                </div>
-                
-                <div class="implementation-content">
-                    <div class="implementation-text">
-                        <h3>PPO Algorithm Implementation</h3>
-                        <p>The project utilizes the Proximal Policy Optimization (PPO) algorithm, which offers stable training for continuous control tasks:</p>
-                        <ul>
-                            <li>Clipped objective function to prevent large policy updates</li>
-                            <li>Value function loss with entropy bonus for exploration</li>
-                            <li>Adaptive learning rate based on KL divergence</li>
-                            <li>Generalized Advantage Estimation (GAE) for better value estimation</li>
-                            <li>Parallel environment sampling for efficient data collection</li>
+                            <li>Penalizing based on the cumulative reward discourages reckless behavior then a flat value</li>
+                            <li>By adding an additional bonus reward based on how fast a car reaches a checkpoint encourages efficient routing and ensures that the agent continues to progress.</li>
                         </ul>
                     </div>
                 </div>
@@ -153,11 +431,50 @@
                 <div class="implementation-content">
                     <div class="implementation-text">
                         <h3>Multi-Agent Shared Critic</h3>
-                        <p>A shared critic architecture enables efficient learning across multiple agents:</p>
+                        <p>The multi-agent system employs a sophisticated shared critic architecture that enables efficient learning across multiple agents while maintaining decentralized execution. This approach combines the benefits of centralized training with decentralized execution, allowing agents to learn from each other's experiences while maintaining independent decision-making capabilities.</p>
+
+                        <h4>Architecture Overview</h4>
                         <ul>
-                            <li>Centralized value function that considers the global state</li>
-                            <li>Decentralized execution where agents act based on local observations</li>
-                            <li>Parameter sharing between agents to reduce learning time</li>
+                            <li>
+                                <strong>Centralized Value Function:</strong>
+                                <ul>
+                                    <li>Global state representation incorporating information from all agents</li>
+                                    <li>Shared neural network for value estimation</li>
+                                    <li>Considers inter-agent relationships and environmental dynamics</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Decentralized Execution:</strong>
+                                <ul>
+                                    <li>Each agent makes decisions based on local observations</li>
+                                    <li>Independent policy networks for individual agents</li>
+                                    <li>Real-time decision making without communication overhead</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Parameter Sharing:</strong>
+                                <ul>
+                                    <li>Shared network weights across agents</li>
+                                    <li>Accelerated learning through experience transfer</li>
+                                    <li>Reduced memory footprint and training time</li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                        <h4>Training Process</h4>
+                        <ul>
+                            <li>Agents collect experiences simultaneously in the environment</li>
+                            <li>Shared critic evaluates the global state and provides value estimates</li>
+                            <li>Individual policies are updated using PPO with shared value estimates</li>
+                            <li>Parameter sharing enables knowledge transfer between agents</li>
+                        </ul>
+
+                        <h4>Advantages</h4>
+                        <ul>
+                            <li>Improved sample efficiency through shared experience</li>
+                            <li>Better generalization across different driving scenarios</li>
+                            <li>Reduced training time compared to independent agent training</li>
+                            <li>Emergent cooperative behaviors through shared learning</li>
                         </ul>
                     </div>
                 </div>
@@ -165,55 +482,118 @@
                 <div class="implementation-content">
                     <div class="implementation-text">
                         <h3>Data Collection & Training</h3>
-                        <p>Efficient data collection and training strategies are employed:</p>
+                        <p>The training process employs sophisticated data collection and learning strategies to ensure efficient and effective learning:</p>
+                        
+                        <h4>Experience Collection</h4>
                         <ul>
-                            <li>Prioritized experience replay to focus on challenging scenarios</li>
-                            <li>Curriculum learning starting with simple scenarios and gradually increasing complexity</li>
+                            <li>
+                                <strong>Parallel Environment Execution:</strong>
+                                <ul>
+                                    <li>Multiple environments run simultaneously</li>
+                                    <li>Increased data collection throughput</li>
+                                    <li>Diverse experience sampling</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Prioritized Experience Replay:</strong>
+                                <ul>
+                                    <li>Focus on challenging scenarios and rare events</li>
+                                    <li>Dynamic priority adjustment based on TD-error</li>
+                                    <li>Balanced sampling of experiences</li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                        <h4>Training Strategies</h4>
+                        <ul>
+                            <li>
+                                <strong>Curriculum Learning:</strong>
+                                <ul>
+                                    <li>Start with simple scenarios (straight roads)</li>
+                                    <li>Gradually introduce complexity (turns, intersections)</li>
+                                    <li>Progressive difficulty scaling</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Hyperparameter Optimization:</strong>
+                                <ul>
+                                    <li>Learning rate scheduling</li>
+                                    <li>Batch size optimization</li>
+                                    <li>Network architecture tuning</li>
+                                </ul>
+                            </li>
                         </ul>
                     </div>
                 </div>
-            </div>
-        </section>
 
-        <section id="progress">
-            <div class="container">
-                <h2>Project Progress & Future Plans</h2>
-                <div class="progress-timeline">
-                    <div class="timeline-item">
-                        <div class="timeline-content">
-                            <h3>Current Progress</h3>
-                            <ul>
-                                <li>Basic simulation environment setup in Unity</li>
-                                <li>Initial implementation of PPO algorithm</li>
-                                <li>Development of reward function framework</li>
-                                <li>Basic multi-agent architecture design</li>
-                                <li>Preliminary testing with simple scenarios</li>
-                            </ul>
-                        </div>
+                <div class="implementation-content">
+                    <div class="implementation-text">
+                        <h3 id="results">Results & Performance</h3>
+                        <p>The implemented system demonstrates significant improvements in autonomous driving capabilities through reinforcement learning:</p>
+
+                        <h4>Training Metrics</h4>
+                        <ul>
+                            <li>
+                                <strong>Learning Progress:</strong>
+                                <ul>
+                                    <li>Rapid initial improvement in basic navigation</li>
+                                    <li>Stable convergence in complex scenarios</li>
+                                    <li>Consistent performance across different environments</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Performance Metrics:</strong>
+                                <ul>
+                                    <li>Average reward per episode</li>
+                                    <li>Success rate in reaching destinations</li>
+                                    <li>Collision avoidance effectiveness</li>
+                                    <li>Speed maintenance and control</li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                        <h4>Key Achievements</h4>
+                        <ul>
+                            <li>Successful navigation of complex urban environments</li>
+                            <li>Effective multi-agent coordination</li>
+                            <li>Robust obstacle avoidance</li>
+                            <li>Efficient path planning and execution</li>
+                        </ul>
                     </div>
-                    <div class="timeline-item">
-                        <div class="timeline-content">
-                            <h3>Short-term Goals</h3>
-                            <ul>
-                                <li>Refine the reward function based on initial testing</li>
-                                <li>Implement the shared critic architecture</li>
-                                <li>Develop more complex road scenarios</li>
-                                <li>Optimize the policy networks for better performance</li>
-                                <li>Implement data collection and storage pipeline</li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="timeline-item">
-                        <div class="timeline-content">
-                            <h3>Long-term Vision</h3>
-                            <ul>
-                                <li>Scale to handle multiple interacting vehicles</li>
-                                <li>Implement advanced traffic management systems</li>
-                                <li>Develop transfer learning capabilities for new scenarios</li>
-                                <li>Create a comprehensive evaluation framework</li>
-                                <li>Publish research findings and open-source components</li>
-                            </ul>
-                        </div>
+                </div>
+
+                <div class="implementation-content">
+                    <div class="implementation-text">
+                        <h3 id="future-work">Future Work</h3>
+                        <p>Several promising directions for future research and development have been identified:</p>
+
+                        <h4>Technical Improvements</h4>
+                        <ul>
+                            <li>
+                                <strong>Algorithm Enhancements:</strong>
+                                <ul>
+                                    <li>Integration of hierarchical reinforcement learning</li>
+                                    <li>Implementation of more sophisticated multi-agent coordination</li>
+                                    <li>Exploration of model-based RL approaches</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Environment Expansion:</strong>
+                                <ul>
+                                    <li>Addition of dynamic obstacles and pedestrians</li>
+                                    <li>Implementation of weather conditions</li>
+                                    <li>Integration of traffic rules and signals</li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                        <h4>Research Directions</h4>
+                        <ul>
+                            <li>Investigation of transfer learning to real-world scenarios</li>
+                            <li>Development of more sophisticated reward functions</li>
+                            <li>Exploration of uncertainty-aware decision making</li>
+                            <li>Integration of human feedback in the learning process</li>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -226,16 +606,22 @@
                     <p>Interested in learning more about this project or potential collaborations?</p>
                     <div class="contact-info">
                         <div class="contact-item">
-                            <i class="fas fa-envelope"></i>
-                            <p>Email</p>
+                            <a href="mailto:mattusuquen@gmail.com" class="contact-button">
+                                <i class="fas fa-envelope"></i>
+                                <span>Email</span>
+                            </a>
                         </div>
                         <div class="contact-item">
-                            <i class="fab fa-github"></i>
-                            <p>GitHub</p>
+                            <a href="https://github.com/mattusuquen" target="_blank" class="contact-button">
+                                <i class="fab fa-github"></i>
+                                <span>GitHub</span>
+                            </a>
                         </div>
                         <div class="contact-item">
-                            <i class="fab fa-linkedin"></i>
-                            <p>LinkedIn</p>
+                            <a href="https://www.linkedin.com/in/matthew-usuquen/" target="_blank" class="contact-button">
+                                <i class="fab fa-linkedin"></i>
+                                <span>LinkedIn</span>
+                            </a>
                         </div>
                     </div>
                 </div>

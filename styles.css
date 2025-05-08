@@ -62,6 +62,45 @@ nav ul li a:hover {
     color: var(--secondary-color);
 }
 
+/* Dropdown Menu Styles */
+.dropdown {
+    position: relative;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: var(--primary-color);
+    min-width: 200px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    z-index: 1000;
+    border-radius: 0 0 10px 10px;
+    padding: 0.5rem 0;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+.dropdown-content li {
+    margin: 0;
+    padding: 0;
+}
+
+.dropdown-content a {
+    color: var(--white);
+    padding: 0.75rem 1rem;
+    display: block;
+    transition: background-color 0.3s ease;
+}
+
+.dropdown-content a:hover {
+    background-color: var(--secondary-color);
+    color: var(--white);
+}
+
 /* Hero Section */
 #hero {
     height: 100vh;
@@ -90,6 +129,25 @@ nav ul li a:hover {
 .hero-content p {
     font-size: 1.2rem;
     opacity: 0.9;
+    margin-bottom: 2rem;
+}
+
+.explore-button {
+    display: inline-block;
+    padding: 1rem 2rem;
+    background-color: var(--secondary-color);
+    color: var(--white);
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.explore-button:hover {
+    background-color: #2980b9;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
 
 /* Sections */
@@ -231,103 +289,30 @@ h2 {
     left: 0;
 }
 
+.implementation-text ul li img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 1rem 0;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.implementation-text ul li ul {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1rem;
+}
+
 /* Footer */
 footer {
     background: var(--primary-color);
     color: var(--white);
     padding: 2rem 0;
     text-align: center;
-}
-
-/* Progress Timeline */
-.progress-timeline {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-    margin-top: 3rem;
-    position: relative;
-}
-
-.progress-timeline:before {
-    content: '';
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 4px;
-    height: 100%;
-    background-color: var(--secondary-color);
-    border-radius: 2px;
-}
-
-.timeline-item {
-    display: flex;
-    justify-content: center;
-    position: relative;
-    z-index: 1;
-}
-
-.timeline-content {
-    background: var(--white);
-    padding: 2rem;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    width: 80%;
-    max-width: 600px;
-    position: relative;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.timeline-content:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-}
-
-.timeline-content:before {
-    content: '';
-    position: absolute;
-    width: 20px;
-    height: 20px;
-    background: var(--secondary-color);
-    border-radius: 50%;
-    top: 50%;
-    transform: translateY(-50%);
-}
-
-.timeline-item:nth-child(odd) .timeline-content:before {
-    right: -30px;
-}
-
-.timeline-item:nth-child(even) .timeline-content:before {
-    left: -30px;
-}
-
-.timeline-content h3 {
-    color: var(--primary-color);
-    margin-bottom: 1rem;
-    font-size: 1.5rem;
-    border-bottom: 2px solid var(--secondary-color);
-    padding-bottom: 0.5rem;
-    display: inline-block;
-}
-
-.timeline-content ul {
-    list-style-position: inside;
-    margin-top: 1rem;
-    padding-left: 0.5rem;
-}
-
-.timeline-content ul li {
-    margin-bottom: 0.5rem;
-    position: relative;
-    padding-left: 1.5rem;
-}
-
-.timeline-content ul li:before {
-    content: "•";
-    color: var(--secondary-color);
-    font-weight: bold;
-    position: absolute;
-    left: 0;
 }
 
 /* Contact Section */
@@ -364,23 +349,36 @@ footer {
     justify-content: center;
 }
 
-.contact-item:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+.contact-button {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: var(--primary-color);
+    text-decoration: none;
+    width: 100%;
+    justify-content: center;
+    transition: all 0.3s ease;
 }
 
-.contact-item i {
-    font-size: 1.5rem;
+.contact-button:hover {
     color: var(--secondary-color);
+}
+
+.contact-button i {
+    font-size: 1.5rem;
     min-width: 24px;
     text-align: center;
 }
 
-.contact-item p {
-    margin: 0;
+.contact-button span {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.contact-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
 
 /* Responsive Design */
@@ -406,19 +404,6 @@ footer {
         padding: 3rem 0;
     }
 
-    .progress-timeline:before {
-        left: 30px;
-    }
-    
-    .timeline-content {
-        width: 80%;
-        margin-left: 60px;
-    }
-    
-    .timeline-content:before {
-        left: -30px !important;
-    }
-    
     .contact-info {
         flex-direction: column;
         align-items: center;
@@ -444,4 +429,45 @@ footer {
 
 .feature-card, .goal-item, .tech-item {
     animation: fadeIn 0.6s ease-out forwards;
+}
+
+/* Reward and Penalty Tables */
+.reward-table, .penalty-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.reward-table th, .penalty-table th {
+    background: #f5f5f5;
+    padding: 12px;
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 2px solid #ddd;
+}
+
+.reward-table td, .penalty-table td {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+    vertical-align: top;
+}
+
+.reward-table tr:hover, .penalty-table tr:hover {
+    background: #f9f9f9;
+}
+
+.subtext {
+    font-size: 0.85em;
+    color: #666;
+    display: block;
+    margin-top: 4px;
+}
+
+code {
+    background: #f0f0f0;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: monospace;
 } 
