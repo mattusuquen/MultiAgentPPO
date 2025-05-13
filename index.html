@@ -16,6 +16,7 @@
                 <h1>Self-Driving Cars</h1>
                 <ul>
                     <li><a href="#overview">Overview</a></li>
+                    <li><a href="#demo">Demo</a></li>
                     <li><a href="#goals">Goals</a></li>
                     <li><a href="#technical">Technical Details</a></li>
                     <li class="dropdown">
@@ -29,6 +30,8 @@
                             <li><a href="#implementation">Data Collection</a></li>
                         </ul>
                     </li>
+                    <li><a href="#performance">Performance</a></li>
+                    <li><a href="#next-steps">Next Steps</a></li>
                     <li><a href="#contact">Contact</a></li>
                 </ul>
             </div>
@@ -68,7 +71,33 @@
                 </div>
             </div>
         </section>
-
+        <section id="demo">
+            <div class="container">
+                <h2>Project Demo</h2>
+                <p>Below are live demonstrations of the multi-agent reinforcement learning system in action. These examples showcase autonomous vehicles navigating different road scenarios, executing turns, avoiding collisions, and reacting to dynamic environments.</p>
+                
+                <div class="demo-gallery">
+        
+                    <div class="demo-item">
+                        <h3>Multi-Agent Coordination</h3>
+                        <video autoplay muted loop>
+                            <source src="videos/demo 3.mp4" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                        <p>Multiple agents navigating the environment with decentralized policies but trained with a shared critic.</p>
+                    </div>
+                    
+                    <div class="demo-item">
+                        <h3>Shared Critic Behavior</h3>
+                        <video autoplay muted loop>
+                            <source src="videos/demo 2.mp4" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                        <p>However in a different scenario due to the shared critic, agents learned to push each other to get to checkpoints faster.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
         <section id="goals">
             <div class="container">
                 <h2>Project Goals</h2>
@@ -128,13 +157,13 @@
                     <div class="implementation-text">
                         <h3>Environment Design</h3>
                         <p>
-                            The autonomous driving simulation was built using Unity's ML-Agents toolkit to provide a controlled and flexible environment for reinforcement learning experiments. The virtual driving environment was carefully designed to balance realism with training efficiency, ensuring that the agent could learn effectively while avoiding unnecessary computational overhead.
+                            The simulation was built using Unity's ML-Agents toolkit to provide a controlled and flexible environment for reinforcement learning experiments. The enviornment is optimized to ensure a balance between realism and performance, especially when having to deal with multithreading these instances.
                           </p>
                         
                           <h4 style="margin-top: 1.5rem;">Key Features:</h4>
                           <ul style="line-height: 1.6;">
                             <li>
-                              <strong>Track Layouts:</strong> The environment includes multiple road configurations such as straight segments, sharp turns, intersections, and continuous loops. These variations challenge the agent's ability to generalize its learned policies across different driving conditions. In order to ensure smooth training, the agent is initially trained on the race track on the left to learn the basic behaviors required to drive. Then the pretrained agent is transfered to the urban environment featured on the left to learn how to interact with sharper turns and intersections.
+                              <strong>Track Layouts:</strong> The environment includes multiple road configurations such as straight segments, sharp turns, intersections, and continuous loops. These variations are designed to challenge the agent's ability to generalize its learned policies across different driving conditions. In order to ensure smooth training, the agent is initially trained on the race track on the left to learn the basic behaviors required to drive. Then the pretrained agent is transfered to the urban environment featured on the left to learn how to interact with sharper turns and intersections.
                               <ul>
                                 <li><img src="images/env-1.png"></li>
                                 <li><img src="images/env-2.png"></li>
@@ -147,19 +176,26 @@
                               </ul>
                             </li>
                             <li>
-                              <strong>Sensor System:</strong> The agent is equipped with a front-facing raycast sensor array that simulates lidar-like perception. These rays detect distances to walls and obstacles, feeding spatial data into the neural network to inform decision-making. Note that the checkpoints are not detected by the sensors.
+                              <strong>Sensor System:</strong> The agent is equipped with a omni-directional raycast sensor array that simulates lidar-like perception. These rays detect distances to walls and obstacles, feeding spatial data into the neural network to inform decision-making. Note that the checkpoints are not detected by the sensors.
                               <ul>
-                                <li><img src="images/sensor.gif"></li>
+                                <li>
+                                    <video autoplay muted loop>
+                                    <source src="videos/sensor.mp4" type="video/mp4">
+                                    Your browser does not support the video tag.
+                                    </video>
+                                </li>
                               </ul>
                             </li>
                             <li>
-                              <strong>Action Space:</strong> The agent outputs continuous values for steering and throttle, mimicking real vehicle controls. This enables smoother and more realistic driving behavior compared to discrete action spaces because it can make small fluid adjustments instead of being limited to a set of actions. In a complex driving environment, having a continous action space allows the agent to make detailed adjustments when dealing with avoiding aobstacles. However, this comes with the drawback of a longer training time because of the infinite number of possible actions that the agent needs to explore and learn causing noisier updates and slower convergance.
+                              <strong>Action Space:</strong> The agent outputs continuous values for steering (negative values representing breaking) and throttle to act as if the agent is actually turning the wheel and stepping on the pedal. This enables smoother and more realistic driving behavior compared to discrete action spaces because it can make small fluid adjustments instead of being limited to a set of actions. In a complex driving environment, having a continous action space allows the agent to make detailed adjustments when dealing with avoiding aobstacles. However, this comes with the drawback of a longer training time because of the infinite number of possible actions that the agent needs to explore and learn causing noisier updates and slower convergance. In order to train on a continuous action the dataset must include unique states so that the agent can learn the proper behaviour for these states.
                             </li>
                             <li>
-                              <strong>Reward System:</strong> Rewards are structured to incentivize forward motion, staying in lane, and avoiding collisions. A small penalty is given for idling or veering off track, helping to shape desirable driving behaviors over time.
-                            </li>
-                            <li>
-                              <strong>Reset Conditions:</strong> Episodes reset automatically upon collision. Episodes also reset when passing the wrong checkpoint to prevent agents from moving in the wrong direction.
+                              <strong>Reset Conditions:</strong> Episode resets are useful when defining the end state of the simulation. On reset, the cars are sent to there starting positions with added positional and rotational noise to further diversify the dataset. Episodes are reset if the following conditions are met:
+                                <ul>
+                                    <li>When the agent is collided with a car or wall for a period of time. Instead of resetting on collision, we can artificially extending the agents episode length, allowing the agent to learn the penalties associated with crashing and giving it the ability to recover.</li>
+                                    <li>Hitting the wrong checkpoint. This ensures the car is going in the correct direction.</li>
+                                    <li>Time limit has been reached before reaching the next checkpoint. This makes it so agents are not stalling.</li>
+                                </ul>
                             </li>
                           </ul>
                     </div>
@@ -168,7 +204,7 @@
                 <div class="implementation-content">
                     <div class="implementation-text">
                         <h3>Agent Design</h3>
-                        <p>The agent's design is crucial for effective learning and decision-making in the autonomous driving environment. The agent's architecture and components are carefully designed to process environmental information and make appropriate driving decisions.</p>
+                        <p>The agent's architecture and components are carefully designed to process environmental information and make appropriate driving decisions.</p>
                         <h4>Key Components:</h4>
                         <ul>
                             <li>
@@ -188,13 +224,12 @@
                                     <li>Normalized rotational vector</li>
                                     <li>Velocity vector and magnitude</li>
                                     <li>Angular vector and magnitude</li>
-                                    <li>Relative position to road boundaries</li>
-                                    <li>Checkpoint proximity information</li>
+                                    <li>Checkpoint position</li>
                                 </ul>
                             </li>
                             <li>
                                 <strong>State Stacking & State Prediction:</strong>
-                                <p>The agent's decision-making process is enhanced through a sophisticated state stacking and prediction mechanism. This approach allows the agent to maintain temporal awareness and make more informed decisions by considering both historical and predicted future states.</p>
+                                <p>The agent's decision-making process is enhanced through a sophisticated state stacking and prediction mechanism. This approach allows the agent to maintain temporal awareness window and make more informed decisions by considering both historical and predicted future states.</p>
 
                                 <h4>State Stacking</h4>
                                 <p>The state stacking mechanism concatenates the current state with the previous two states to create a temporal context for decision-making. This approach is crucial for several reasons:</p>
@@ -206,9 +241,9 @@
                                 <p>For example, when approaching a turn, the stacked states help the agent understand its current speed, how it has been accelerating or decelerating, and what adjustments might be needed to navigate the turn smoothly.</p>
 
                                 <h4>State Prediction</h4>
-                                <p>The state prediction system uses a pretrained neural network to forecast the next two states based on the current and stacked historical states. This prediction mechanism serves several important purposes:</p>
+                                <p>The state prediction system uses a pretrained neural network to forecast the next state given the current state. This prediction network can then be applied on the predicted state to get the second predicted state. The process can be repeated to achieve a prediction of the next k states, but will start to see drops in accuracy.</p>
                                 <ul>
-                                    <li>The pretrained network has learned the dynamics of the environment and can accurately predict how the agent's state will evolve.</li>
+                                    <li>The pretrained network has learned the dynamics of the environment and can accurately predict how the agent's state will change.</li>
                                     <li>By predicting future states, the agent can anticipate potential issues before they occur, such as upcoming obstacles or the need to adjust speed for a turn.</li>
                                     <li>The predictions help the agent make more proactive decisions rather than purely reactive ones.</li>
                                 </ul>
@@ -229,9 +264,8 @@
                                 <ul>
                                     <li>Input layer processes sensor and state data</li>
                                     <li>Multiple hidden layers with ReLU activation</li>
-                                    <li>Output layer for continuous action values for gas, brake, and steering angle</li>
+                                    <li>Output layer for continuous action values for gas/brake, and steering angle</li>
                                     <li>Dropout layers and normalization used to prevent overfitting</li>
-                                    <li>Independent shared value network for advantage estimation</li>
                                 </ul>
                             </li>
                         </ul>
@@ -345,7 +379,7 @@
                 <div class="implementation-content">
                     <div class="implementation-text">
                         <h3>Reward Function Design</h3>
-                        <p>The reward function is a critical component in defining the agent's performance. By quantifying the current state of the agent, the reward function guides the learning process and shapes the agent's behavior. The design of the reward function is crucial for effective training and achieving desired driving behaviors.</p>
+                        <p>The reward function is used to understand the value of each state. By quantifying the current state of the agent, the reward function guides the learning process and shapes the agent's behavior. The design of the reward function is crucial for effective training and achieving desired driving behaviors.</p>
                         <p>The reward function is designed to provide feedback based on the agent's actions and the environment's state. It assigns rewards and penalties based on the agent's performance, encouraging it to learn optimal driving strategies.</p>
                         <p>The reward function is carefully designed to encourage desired driving behaviors:</p>
                         <h4>✅ Rewards</h2>
@@ -423,11 +457,11 @@
                 
                 <div class="implementation-content">
                     <div class="implementation-text">
-                        <h3>Multi-Agent Shared Critic</h3>
+                        <h3>Multi-Agent Learning</h3>
                         <h4>Architecture Overview</h4>
 
                         <p>
-                        At the core of the shared critic architecture is a centralized value function that leverages a global state representation. Unlike traditional single-agent systems where the value function is solely based on local information, this centralized approach aggregates data from all agents, including their observations, actions, and relevant environmental signals. This global perspective enables the system to capture intricate inter-agent dependencies and emergent patterns that would otherwise be lost in decentralized learning.
+                        At the core of the shared critic architecture is a centralized value function that leverages a global state representation. Unlike traditional single-agent systems where the value function is solely based on local information, this centralized approach aggregates data from all agents, including their observations, actions, and relevant environmental signals. This global perspective enables the system to capture intricate agent interactions and emergent patterns that would otherwise be lost in decentralized learning.
                         </p>
 
                         <p>
@@ -435,11 +469,11 @@
                         </p>
 
                         <p>
-                        Despite the centralized nature of the training process, execution remains fully decentralized. Each agent operates based solely on its own local observations and internal policy, without needing access to the full global state or the actions of other agents at runtime. This separation ensures that agents can act independently in real-time, making the system suitable for deployment in bandwidth-constrained or communication-limited environments. To enable this, each agent is equipped with its own policy network that is trained to map its partial observations to actions. These policy networks are typically smaller and faster than the critic, optimized for real-time performance.
+                        Despite the centralized nature of the training process, execution remains fully decentralized. Each agent operates based solely on its own local observations and internal policy, without needing access to the full global state or the actions of other agents at runtime. This separation ensures that agents can act independently in real-time, making the system suitable for deployment in bandwidth-constrained or communication-limited environments. To enable this, each agent is equipped with its own policy network that is trained to map its partial observations to actions. 
                         </p>
 
                         <p>
-                        A key innovation in this architecture is the use of parameter sharing. During training, the policy networks of different agents may share weights, either fully or partially, depending on the symmetry of their roles and tasks. This strategy significantly improves learning efficiency by enabling agents to transfer knowledge gained from their individual experiences to others. For instance, an agent that learns a successful maneuver in one context can contribute to the improvement of its peers in similar situations. Furthermore, parameter sharing reduces the overall memory and computational footprint, allowing more scalable training and simpler deployment.
+                        This architecture utilizes parameter sharing. During training, the policy networks of different agents may share weights, either fully or partially, depending on the symmetry of their roles and tasks. This strategy significantly improves learning efficiency by enabling agents to transfer knowledge gained from their individual experiences to others. For instance, an agent that learns a successful maneuver in one context can contribute to the improvement of its peers in similar situations. Furthermore, parameter sharing reduces the overall memory and computational footprint, allowing more scalable training which will be important when we get to multithreading.
                         </p>
 
                         <h4>Training Process</h4>
@@ -449,7 +483,7 @@
                         </p>
 
                         <p>
-                        Policy updates are performed using Proximal Policy Optimization (PPO), a stable and efficient policy gradient method that ensures small, incremental updates to the policy parameters. The shared critic’s value estimates are used across all agents, enabling consistent and coordinated improvement even when the agents are learning independently. This shared learning signal encourages the emergence of synergistic behaviors that benefit the entire system, rather than optimizing each agent in isolation.
+                        Policy updates are performed using Proximal Policy Optimization (PPO). The shared critic’s value estimates are used across all agents, enabling consistent and coordinated improvement even when the agents are learning independently. This shared learning signal encourages the emergence of synergistic behaviors that benefit the entire system, rather than optimizing each agent in isolation.
                         </p>
 
                         <p>
@@ -471,19 +505,8 @@
                         </p>
 
                         <p>
-                        Perhaps most intriguingly, the shared critic framework fosters emergent cooperative behaviors. Even without explicit coordination mechanisms, agents learn to act in ways that benefit the group as a whole because their policies are updated based on shared evaluations of joint outcomes. This implicit cooperation is a natural result of optimizing policies using a collective value signal, and it can lead to sophisticated team dynamics without the need for hand-crafted communication protocols.
+                        The shared critic framework fosters emergent cooperative behaviors. Even without explicit coordination mechanisms within the loss or reward function, agents learn to act in ways that benefit the group as a whole because their policies are updated based on shared evaluations of joint outcomes. This implicit cooperation is a natural result of optimizing policies using a collective value signal, and it can lead to sophisticated team dynamics without the need for hand-crafted communication protocols.
                         </p>
-
-                        <h4>Use Cases and Applicability</h4>
-
-                        <p>
-                        The shared critic architecture is particularly well-suited for domains that require both high coordination and decentralized execution. These include autonomous vehicle fleets, multi-drone navigation, robotic warehouse management, and distributed sensor systems. In these contexts, agents often operate under local constraints while contributing to a broader collective objective. The architecture’s ability to capture and exploit inter-agent synergies during training while supporting efficient individual decision-making during deployment makes it an ideal solution for such challenges.
-                        </p>
-
-                        <p>
-                        Furthermore, the model’s scalability, training efficiency, and support for emergent cooperation make it a promising foundation for future developments in multi-agent reinforcement learning and collaborative AI systems.
-                        </p>
-
                     </div>
                 </div>
                 
@@ -495,79 +518,87 @@
                         <h4>Experience Collection</h4>
 
                         <p>
-                        A critical aspect of successful multi-agent reinforcement learning is the quality and diversity of experience collected during training. To this end, the system employs parallel environment execution, where multiple instances of the simulation environment are run concurrently. This dramatically increases the rate at which agents can collect trajectories, enabling rapid accumulation of a diverse and representative dataset. Each environment may differ slightly in its initial conditions, configurations, or stochastic elements, promoting exploration across a wider space of possible states and transitions. This parallelism not only boosts data throughput but also improves the statistical richness of the collected experience, which is essential for training generalizable policies.
-                        </p>
-
-                        <p>
-                        In addition to raw throughput, the system incorporates a prioritized experience replay mechanism to focus learning on high-value experiences. Rather than treating all collected samples equally, the replay buffer assigns priority scores to each transition, typically based on the temporal-difference (TD) error observed during training. Samples with higher TD errors—often corresponding to rare events, edge cases, or difficult decision points—are more likely to be revisited during policy updates. This ensures that the learning algorithm pays special attention to scenarios where the current policy performs poorly or is uncertain, accelerating improvement in the most challenging parts of the environment. At the same time, the buffer maintains a degree of stochastic sampling to preserve coverage across the entire experience distribution and prevent overfitting to outliers.
+                        An agent can only learn what it's seen before. Without a diverse dataset, the agent will be unable to learn the desired behavior. To combat this the system employs parallel environment execution, where multiple instances of the simulation environment are run concurrently. This dramatically increases the rate at which agents can collect trajectories, enabling rapid accumulation of a diverse and representative dataset. Each environment may differ slightly in its initial conditions, like number of agents. These initial conditions are randomized and allows for each instance to be completely unique from one another to romote explorating across a wider space of possible states and transitions. This parallelism not only boosts data throughput, but fills the dataset with unique states. Which is essential for training generalizable policies.
                         </p>
 
                         <h4>Training Strategies</h4>
 
                         <p>
-                        The training process is structured using curriculum learning, a technique inspired by human education systems. Rather than exposing agents to the full complexity of the environment from the outset, training begins with simple, controlled scenarios—such as navigating straight roads with minimal obstacles. These foundational tasks help agents establish basic competencies in perception, action selection, and movement coordination without being overwhelmed by noise or ambiguity.
+                        The training process is structured using curriculum learning, a technique inspired by human education systems. Rather than exposing agents to the full complexity of the environment from the outset, training begins with simple, controlled scenarios. This agent started with the task of navigating straight roads with no other agents. These foundational tasks help agents establish basic competencies in perception, action selection, and movement coordination without being overwhelmed by the complexity that comes with added features.
                         </p>
 
                         <p>
                         As agents demonstrate proficiency in simpler tasks, the curriculum gradually increases in complexity. New challenges, such as curved roads, dynamic obstacles, intersections, or multi-agent interactions, are introduced incrementally. This progressive scaling helps agents adapt and extend their learned policies in a structured manner, reducing the risk of catastrophic forgetting and improving transfer to unseen scenarios. The curriculum can be manually defined or automatically adjusted based on performance metrics, ensuring that agents are consistently training at the edge of their competence.
                         </p>
-
                         <p>
-                        To support effective learning throughout this staged progression, the system applies rigorous hyperparameter optimization. Key parameters such as the learning rate, batch size, and network architecture are systematically tuned to match the demands of the current learning phase. Learning rate scheduling techniques, such as cosine annealing or step decay, are used to adapt the pace of learning as agents move from exploration-heavy early stages to fine-tuning in later stages. Batch size is adjusted to balance stability and computational efficiency, while the structure of neural networks—such as the number of layers, hidden units, and activation functions—is refined to ensure sufficient model capacity without overfitting.
-                        </p>
-
-                        <p>
-                        Together, these training strategies form a cohesive framework that guides agents from novice behavior to expert performance. By balancing exploration with exploitation, structuring task complexity over time, and continuously refining the learning process, the system enables the emergence of sophisticated behaviors across a wide range of operational scenarios.
+                        By balancing exploration with exploitation, structuring task complexity over time, and continuously refining the learning process, the system enables the emergence of sophisticated behaviors across a wide range of scenarios.
                         </p>
                     </div>
                 </div>
             </div>
         </section>
-        <!--
-        <section id="progress">
+        <section id="performance">
             <div class="container">
-                <h2>Project Progress & Future Plans</h2>
-                <div class="progress-timeline">
-                    <div class="timeline-item">
-                        <div class="timeline-content">
-                            <h3>Current Progress</h3>
-                            <ul>
-                                <li>Basic simulation environment setup in Unity</li>
-                                <li>Initial implementation of PPO algorithm</li>
-                                <li>Development of reward function framework</li>
-                                <li>Basic multi-agent architecture design</li>
-                                <li>Preliminary testing with simple scenarios</li>
-                            </ul>
-                        </div>
+                <h2>Performance Analysis</h2>
+                <p>This section presents the training results and performance benchmarks of the autonomous driving agents. Various metrics such as reward accumulation, policy loss, and success rates are visualized and analyzed to demonstrate learning progress and stability.</p>
+        
+                <div class="performance-gallery">
+        
+                    <div class="performance-item">
+                        <h3>Average Cumulative Reward Over Time</h3>
+                        <img src="images/cumulative reward.png" alt="Average Cumulative Reward per Episode Graph">
+                        <ul>
+                            <li>The cumulative reward graph tracks the total reward accumulated over time.</li>
+                            <li>The reward starts at a low value due to its randomized initialization, but it consistently increases as the simulation progresses, indicating that the agents are getting better at completing tasks and optimizing the reward function.</li>
+                        </ul>
                     </div>
-                    <div class="timeline-item">
-                        <div class="timeline-content">
-                            <h3>Short-term Goals</h3>
-                            <ul>
-                                <li>Refine the reward function based on initial testing</li>
-                                <li>Implement the shared critic architecture</li>
-                                <li>Develop more complex road scenarios</li>
-                                <li>Optimize the policy networks for better performance</li>
-                                <li>Implement data collection and storage pipeline</li>
-                            </ul>
-                        </div>
+        
+                    <div class="performance-item">
+                        <h3>Episode Duration</h3>
+                        <img src="images/episode length.png" alt="Loss Curves">
+                        <p>This graph shows how the episode length changes over time as the simulation progresses and is used to describe the average survival length of the agents. The episode length steadily increases as the simulation advances, indicating that the agents are learning how to survive longer within the environment.</p>
                     </div>
-                    <div class="timeline-item">
-                        <div class="timeline-content">
-                            <h3>Long-term Vision</h3>
-                            <ul>
-                                <li>Scale to handle multiple interacting vehicles</li>
-                                <li>Implement advanced traffic management systems</li>
-                                <li>Develop transfer learning capabilities for new scenarios</li>
-                                <li>Create a comprehensive evaluation framework</li>
-                                <li>Publish research findings and open-source components</li>
-                            </ul>
-                        </div>
+                    <div class="performance-item">
+                        <h3>Velocity Distribution</h3>
+                        <img src="images/max velocity.png" alt="Max Velocity over Time">
+                        <img src="images/avg velocity.png" alt="Average Velocity over Time">
+                        <img src="images/min velocity.png" alt="Min Velocity over Time">
+                        <p>The distribution reflects that the agent has learned to maintain speeds within the optimal range. The presence of excessive speeds decreases significantly as penalties shape the agent’s behavior. Also, we can note that there is an increase in speed over time, showing how the agent is able to survive longer lengths while maintaining a faster velocity.</p>
+                    </div>
+        
+                </div>
+            </div>
+        </section>
+        <section id="next-steps">
+            <div class="container">
+                <h2>Next Steps</h2>
+                <p>This project is continually evolving. Below are the planned next steps to enhance functionality, improve performance, and extend the scope of the research.</p>
+        
+                <div class="next-steps-grid">
+                    <div class="next-step-item">
+                        <h3>Convolutional Neural Networks</h3>
+                        <p>Utilizing CNNs would allow the ability to capture local features and find relationships between the stacked states.</p>
+                        
+                    </div>
+        
+                    <div class="next-step-item">
+                        <h3>Experiment with Advanced Environments</h3>
+                        <p>Incorporate designated lanes and traffic lights to get the agent to learn difficult situations like merging or lane changing.</p>
+                    </div>
+        
+                    <div class="next-step-item">
+                        <h3>Advanced Sensor Modeling</h3>
+                        <p>Simulate lidar, gps, camera feeds to create more realistic observation spaces and test what sensor technique performs the best.</p>
+                    </div>
+        
+                    <div class="next-step-item">
+                        <h3>Cross-Agent Communication</h3>
+                        <p>Experiment with explicit message passing between agents to improve coordination in complex multi-agent environments such as intersections or roundabouts.</p>
                     </div>
                 </div>
             </div>
         </section>
-        -->
+        
 
         <section id="contact">
             <div class="container">
